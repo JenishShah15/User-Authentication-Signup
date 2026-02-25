@@ -9,33 +9,29 @@ import {
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id!: string;
+
+  @Column({ length: 100 })
+  name!: string;
 
   @Column()
-  name: string;
+  age!: number;
 
   @Column()
-  age: number;
-
-  @Column()
-  country: string;
+  country!: string;
 
   @Column({ unique: true })
-  phone: string;
+  phone!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ select: false })
-  password: string;
+  password!: string;
 
   @CreateDateColumn()
-  created_at: Date;
+  created_at!: Date;
 
   @UpdateDateColumn()
-  updated_at: Date;
-
-  constructor(partial?: Partial<User>) {
-    if (partial) Object.assign(this, partial);
-  }
+  updated_at!: Date;
 }
