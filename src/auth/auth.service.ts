@@ -1,5 +1,4 @@
 import {
-  ForbiddenException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -32,6 +31,11 @@ export class AuthService {
         user.password,
       );
       if (matchpassword) {
+        console.log(loginDto);
+        const payload = { sub: user.id, username: user.name };
+        return {
+          access_token: await this.jwtService.signAsync(payload),
+        };
       } else {
         throw new UnauthorizedException({
           message: 'Password invalid',
