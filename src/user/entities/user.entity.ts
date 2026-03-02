@@ -2,9 +2,11 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import {User_Sessions} from '../../session/entities/session.entity'
 
 @Entity()
 export class User {
@@ -28,6 +30,9 @@ export class User {
 
   @Column({ select: false })
   password!: string;
+
+  @OneToMany(()=>User_Sessions,session=> session.user)
+  sessions! : User_Sessions[]
 
   @CreateDateColumn()
   created_at!: Date;

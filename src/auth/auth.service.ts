@@ -8,12 +8,14 @@ import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dtos/login.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import { SessionService } from 'src/session/session.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
+    private sessionService : SessionService,
   ) {}
 
   async signin(loginDto: LoginDto) {
@@ -43,5 +45,12 @@ export class AuthService {
         });
       }
     }
+  }
+
+  async getProfile(user: any) {
+    let email = "";
+    let { sub } = user;
+    let profiledata = await this.userService.findOne(email,sub);
+    return profiledata;
   }
 }
