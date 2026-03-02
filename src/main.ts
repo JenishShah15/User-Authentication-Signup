@@ -3,6 +3,8 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 import { ValidationPipe } from '@nestjs/common';
+import { Type } from 'class-transformer';
+import { describe } from 'node:test';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,7 +13,16 @@ async function bootstrap() {
     .setDescription('the user api description')
     .setVersion('1.0')
     .addTag('User')
-    .build();
+    .addBearerAuth({
+      type : 'http',
+      scheme : 'bearer',
+      bearerFormat : 'JWT',
+      name : 'Authorization',
+      description : 'Enter JWT Token',
+      in : 'header'
+    },'access-token')
+    .build()
+    ;
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
