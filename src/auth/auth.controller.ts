@@ -30,6 +30,7 @@ export class AuthController {
   @ApiBearerAuth('access-token')
   @Get('profile')
   getProfile(@Request() req: any) {
+    console.log(req);
     return this.authService.getProfile(req.user);
   }
 }

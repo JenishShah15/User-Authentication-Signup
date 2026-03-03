@@ -13,7 +13,7 @@ export class User_Sessions {
   @PrimaryGeneratedColumn('uuid')
   session_id!: string;
 
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })   
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user!: User;
 
   @Column({ type: 'timestamp' })
@@ -22,8 +22,8 @@ export class User_Sessions {
   @Column({ type: 'enum', enum: ['ACTIVE', 'LOGGED_OUT', 'FAILED'] })
   login_status!: string;
 
-  @Column({ length: 45 })
-  IP_ADDRESS!: string;
+  @Column({ length: 255, nullable: true })
+  jwt_token!: string;
 
   @CreateDateColumn()
   created_at!: Date;
