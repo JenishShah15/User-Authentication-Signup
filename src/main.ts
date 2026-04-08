@@ -1,28 +1,37 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import 'reflect-metadata';
 import { ValidationPipe } from '@nestjs/common';
 import { Type } from 'class-transformer';
 import { describe } from 'node:test';
+import { JwtService } from '@nestjs/jwt';
+import { AuthGuard } from './common/auth.guard';
+import { RolesGuard } from './common/roles.guard';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
   const config = new DocumentBuilder()
     .setTitle('crud auth api')
     .setDescription('the user api description')
     .setVersion('1.0')
     .addTag('User')
-    .addBearerAuth({
-      type : 'http',
-      scheme : 'bearer',
-      bearerFormat : 'JWT',
-      name : 'Authorization',
-      description : 'Enter JWT Token',
-      in : 'header'
-    },'access-token')
-    .build()
-    ;
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        name: 'Authorization',
+        description: 'Enter JWT Token',
+        in: 'header',
+      },
+      'access-token',
+    )
+    .build();
+  const jwtService = app.get(JwtService);
+  const reflector = app.get(Reflector);
+  app.useGlobalGuards(new AuthGuard(jwtService, reflector),new RolesGuard(reflector));
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

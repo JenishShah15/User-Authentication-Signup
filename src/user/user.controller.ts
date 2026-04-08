@@ -11,12 +11,16 @@ import {
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { isPublic } from 'src/common/public.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { Roles } from 'src/common/roles.decorator';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @isPublic()
   async create(@Body() createUserDto: CreateUserDto) {
     const user = await this.userService.create(createUserDto);
     const userWithoutPassword = { ...user, password: '*******' };
@@ -29,6 +33,8 @@ export class UserController {
   }
 
   @Get()
+  @ApiBearerAuth('access-token')
+  @Roles('admin')
   async findAll() {
     const users = await this.userService.findAll();
     if (users.length != 0) {

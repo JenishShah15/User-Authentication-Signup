@@ -6,7 +6,13 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
+
 import {User_Sessions} from '../../session/entities/session.entity'
+import { roles } from 'src/common/roles';
+
+
+
+
 
 @Entity()
 export class User {
@@ -33,6 +39,10 @@ export class User {
 
   @OneToMany(()=>User_Sessions,session=> session.user)
   sessions! : User_Sessions[]
+
+  @Column({type:'enum',enum:roles,default:roles.USER})
+  role : roles
+ 
 
   @CreateDateColumn()
   created_at!: Date;

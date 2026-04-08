@@ -36,7 +36,7 @@ export class AuthService {
       );
       if (matchpassword) {
         
-        const payload = { sub: user.id, username: user.name };
+        const payload = { sub: user.id, username: user.name,role:user.role };
         const access_token =  await this.jwtService.signAsync(payload);
          const sessionobj = {
             user: user.id,

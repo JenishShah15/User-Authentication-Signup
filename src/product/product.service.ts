@@ -29,8 +29,13 @@ export class ProductService {
   }
   }
 
-  findAll() {
-    return `This action returns all product`;
+  async findAll() {
+    const response = await httpClient.get(`/catalog/product/all`);
+    if(response)
+    return {success : true,message :"Product fetched successfully",data : response.data};
+  else
+    return {success : false,message :"Product fetched failed"};
+
   }
 
   findOne(id: number) {
