@@ -53,11 +53,13 @@ export class UserController {
   }
 
   @Get(':id')
+  @ApiBearerAuth('access-token')
   findOne(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.userService.findOne(id);
   }
 
   @Patch(':id')
+  @ApiBearerAuth('access-token')
   update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() updateUserDto: UpdateUserDto,
@@ -66,6 +68,8 @@ export class UserController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('access-token')
+  @Roles('admin')
   remove(@Param('id', new ParseUUIDPipe()) id: string) {
     return this.userService.remove(id);
   }

@@ -38,15 +38,35 @@ export class ProductService {
 
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string) {
+    // return `This action returns a #${id} product`;
+    const response = await httpClient.get(`/catalog/product/${id}`);
+    if(response)
+    return {success : true,message :"Product fetched successfully",data : response.data};
+  else
+    return {success : false,message :"Product fetched failed"};
   }
 
-  update(id: number, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(id: number, updateProductDto: UpdateProductDto) {
+    try{
+      const resbodydata = {updateProductDto,id}
+    const response = await httpClient.patch('/catalog/product/update',resbodydata);
+    if(response)
+      return {success : true,message :"Product updated successfully",data : response.data};
+    else
+      return {success : false,message :"Product updated failed"};
+    }catch(error)
+    {
+      console.error("Product service error",error.message);
+      throw new HttpException('Product Service error',error.status)
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} product`;
+ async remove(id: string) {
+    const response = await httpClient.delete(`/catalog/product/delete/${id}`);
+    if(response)
+      return {success : true,message :"Product deleted successfully",data : response.data};
+    else
+      return {success : false,message :"Product deleted failed"};
   }
 }
