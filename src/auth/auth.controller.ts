@@ -11,6 +11,7 @@ import { LoginDto } from './dtos/login.dto';
 import { AuthGuard } from '../common/auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { isPublic } from '../common/public.decorator';
+import { STATUS_CODES } from 'http';
 
 @Controller('auth')
 export class AuthController {
@@ -22,6 +23,7 @@ export class AuthController {
     const logindata = await this.authService.signin(loginDto);
 
     return {
+      STATUS_CODES : 200,
       success: true,
       user: logindata,
       message: 'user logged in succesfull',

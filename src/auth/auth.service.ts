@@ -65,9 +65,8 @@ export class AuthService {
   }
 
   async getProfile(user: any) {
-    let email = '';
     let { sub } = user;
-    let profiledata = await this.userService.findOne(email, sub);
+    let profiledata = await this.userService.findOne(sub);
     return profiledata;
   }
 }

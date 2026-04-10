@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,6 +10,14 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
+import { STATUS_CODES } from 'http';
+
+export interface UpdateUserResponse {
+  data: User;
+  message: string;
+  STATUS_CODES: number;
+  success: boolean;
+}
 
 @Injectable()
 export class UserService {
@@ -30,10 +39,28 @@ export class UserService {
       console.log('error printing');
       console.log(error.detail);
       console.log('error printing ended');
-      throw new BadRequestException({
+      if(error.detail?.includes('email')){
+        throw new ConflictException({
+          STATUS_CODES : 409,
+          success: false,
+          message: 'Failed to create user. Acount already existed with email',
+          error: error.detail,
+        })
+      }
+      if(error.detail?.includes('phone')){
+        throw new ConflictException({
+          STATUS_CODES : 409,
+          success: false,
+          message: 'Failed to create user. Acount already existed with phone no.',
+          error: error.detail,
+        })
+      }
+      throw new ConflictException({
+        STATUS_CODES : 409,
         success: false,
-        message: 'Failed to create user',
+        message: 'Failed to create user. Acount already existed with email or phone no.',
         error: error.detail,
+
       });
     }
   }
@@ -50,13 +77,11 @@ export class UserService {
       .getOne();
   }
 
-  async findOne(email: string, sub?: string) {
+  async findOne(sub?: string) {
     var user;
     if (sub) {
-       user = await this.userRepository.findOneBy({ id: sub });
+      user = await this.userRepository.findOneBy({ id: sub });
       return user;
-    } else {
-       user = await this.userRepository.findOneBy({ email });
     }
     if (!user) {
       throw new NotFoundException('User not found');
@@ -64,19 +89,20 @@ export class UserService {
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<UpdateUserResponse> {
     const result = await this.userRepository.update(id, updateUserDto);
     if (result.affected == 0) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Resource not found , resource Id is invalid');
     }
-    return this.findOne(id);
+    const user = await this.findOne(id);
+    return {data : user, message : 'User updated successfully',STATUS_CODES : 200,success : true,};
   }
 
   async remove(id: string) {
     const result = await this.userRepository.delete(id);
     if (result.affected == 0) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException('Resource not found,Resource id is invalid');
     }
-    return { message: 'User deleted successfully' };
+    return { message: 'User deleted successfully',STATUS_CODES : 200,success : true };
   }
 }
