@@ -1,17 +1,16 @@
-import { HttpException, Injectable, ServiceUnavailableException, GatewayTimeoutException } from '@nestjs/common';
+import { HttpException, Injectable, ServiceUnavailableException, GatewayTimeoutException, BadGatewayException } from '@nestjs/common';
 import { createproductdto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { HttpService } from '@nestjs/axios';
 import axios from 'axios';
 import { httpClient } from 'src/common/http-client';
+import { error } from 'console';
 
 
 
 @Injectable()
 export class ProductService {
-  /**
-   *
-   */
+
   constructor(private readonly http:HttpService) {}
 
    
@@ -20,12 +19,14 @@ export class ProductService {
   try{
 
     const response = await httpClient.post(`/catalog/product`,createProductDto)
-    console.log(response.data);
+    if(response.data.success)
     return response.data;
+    throw response.data
   }catch(error)
   {
+    console.log(error);
     console.error("Product service error",error.message);
-    throw new HttpException('Product Service error',error.status)
+    throw new BadGatewayException({success : false,statusCode : 502,err : error.message});
 
   }
   }

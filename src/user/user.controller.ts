@@ -10,15 +10,15 @@ import {
   Req,
   ForbiddenException,
   HttpCode,
+  NotFoundException,
 } from '@nestjs/common';
 import type { Request } from 'express';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { isPublic } from 'src/common/public.decorator';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiResponse } from '@nestjs/swagger';
 import { Roles } from 'src/common/roles.decorator';
-import { STATUS_CODES } from 'http';
 
 @Controller('users')
 export class UserController {
@@ -41,30 +41,28 @@ export class UserController {
   @Get()
   @ApiBearerAuth('access-token')
   @Roles('admin')
-  @HttpCode(202)
+  @ApiResponse({status  : 200,description : "User retrieved successfully by apiresponse"})
+  @ApiResponse({status  : 404,description : "no users found by apiresponse"})
   async findAll() {
     const users = await this.userService.findAll();
-    if (users.length != 0) {
+    if (users.length == 0) {
       return {
         success: true,
-        STATUS_CODES: 200,
+        statusCode: 200,
         message: 'Users retrieved successfully',
         data: users,
       };
     } else {
-      return {
-        success: false,
-        STATUS_CODES: 404,
-        message: 'no users found',
-        data: [],
-      };
+      throw new NotFoundException({success: false,statusCode : 404, message : "No user data availaible"})
     }
   }
 
   @Get(':id')
   @ApiBearerAuth('access-token')
+   @ApiResponse({status  : 200,description : "User retrieved successfully"})
+  @ApiResponse({status  : 404,description : "no user found"})
   async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    console.log('enterring find one controller');
+    console.log('enterring find one controller',id);
     return await this.userService.findOne(id);
   }
 

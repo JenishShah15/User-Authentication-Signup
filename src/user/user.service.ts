@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  GoneException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,7 +11,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
-import { STATUS_CODES } from 'http';
+import { error } from 'console';
 
 export interface UpdateUserResponse {
   data: User;
@@ -39,28 +40,29 @@ export class UserService {
       console.log('error printing');
       console.log(error.detail);
       console.log('error printing ended');
-      if(error.detail?.includes('email')){
+      if (error.detail?.includes('email')) {
         throw new ConflictException({
-          STATUS_CODES : 409,
+          STATUS_CODES: 409,
           success: false,
           message: 'Failed to create user. Acount already existed with email',
           error: error.detail,
-        })
+        });
       }
-      if(error.detail?.includes('phone')){
+      if (error.detail?.includes('phone')) {
         throw new ConflictException({
-          STATUS_CODES : 409,
+          STATUS_CODES: 409,
           success: false,
-          message: 'Failed to create user. Acount already existed with phone no.',
+          message:
+            'Failed to create user. Acount already existed with phone no.',
           error: error.detail,
-        })
+        });
       }
       throw new ConflictException({
-        STATUS_CODES : 409,
+        STATUS_CODES: 409,
         success: false,
-        message: 'Failed to create user. Acount already existed with email or phone no.',
+        message:
+          'Failed to create user. Acount already existed with email or phone no.',
         error: error.detail,
-
       });
     }
   }
@@ -79,23 +81,48 @@ export class UserService {
 
   async findOne(sub?: string) {
     var user;
-    if (sub) {
-      user = await this.userRepository.findOneBy({ id: sub });
-      return user;
+    try {
+      if (sub) {
+        console.log(sub)
+        user = await this.userRepository.findOneBy({ id: sub });
+        if(user)
+          if(user.deletedAt)
+            throw new GoneException("Sorry the resource is deleted. Can't be recovered");
+          else
+          return user;
+      else
+        throw error;
+      }
+
+    } catch (err) {
+      // console.log("printing",err.message)
+      throw new NotFoundException({
+        statusCode: 404,
+        message: 'User not found',
+        success: false,
+        id: sub,
+        errorDetail  : err.message
+      });
     }
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<UpdateUserResponse> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<UpdateUserResponse> {
     const result = await this.userRepository.update(id, updateUserDto);
     if (result.affected == 0) {
-      throw new NotFoundException('Resource not found , resource Id is invalid');
+      throw new NotFoundException(
+        'Resource not found , resource Id is invalid',
+      );
     }
     const user = await this.findOne(id);
-    return {data : user, message : 'User updated successfully',STATUS_CODES : 200,success : true,};
+    return {
+      data: user,
+      message: 'User updated successfully',
+      STATUS_CODES: 200,
+      success: true,
+    };
   }
 
   async remove(id: string) {
@@ -103,6 +130,10 @@ export class UserService {
     if (result.affected == 0) {
       throw new NotFoundException('Resource not found,Resource id is invalid');
     }
-    return { message: 'User deleted successfully',STATUS_CODES : 200,success : true };
+    return {
+      message: 'User deleted successfully',
+      STATUS_CODES: 200,
+      success: true,
+    };
   }
 }

@@ -18,7 +18,6 @@ export class createproductdto {
   name!: string;
 
   @IsString()
-
   @ApiProperty({
     example : 'randomuuid',
     default: 'User Id',
